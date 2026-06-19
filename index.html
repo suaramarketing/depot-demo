@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Depot — Praxis-Bestand</title>
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#FFFFFF; --ink:#16211F; --muted:#6A7A77;
+    --teal:#1A564C; --teal-d:#123E37; --teal2:#2D7A6B; --sage:#8FB3A8;
+    --tint:#E7F0EC; --tint2:#F4F0E8; --line:#E2E9E5;
+    --coral:#B5543F; --amber:#C08A3E; --green:#4F9E76;
+    --r-bg:#FBECE8; --a-bg:#F8EFDD; --g-bg:#E7F1EA;
+    --shadow-sm:0 1px 2px rgba(20,40,36,.05);
+    --shadow:0 2px 8px rgba(20,40,36,.06), 0 16px 44px rgba(20,40,36,.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased;font-size:16px}
+  .wrap{max-width:1020px;margin:0 auto;padding:0 24px}
+  a{color:inherit}
+  button{font:inherit;cursor:pointer;border:none}
+
+  header{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:14px;max-width:1020px;margin:0 auto;padding:14px 24px;flex-wrap:wrap}
+  .brand{display:flex;align-items:baseline;gap:11px}
+  .logo{font-size:21px;font-weight:800;color:var(--teal);letter-spacing:-0.03em}
+  .logo .d{color:var(--sage)}
+  .brand .tag{font-size:12px;color:var(--muted)}
+  .actions{display:flex;gap:8px;flex-wrap:wrap}
+  .btn{padding:9px 15px;border-radius:10px;background:var(--teal);color:#fff;font-weight:700;font-size:14px;
+    box-shadow:var(--shadow-sm);transition:background .15s,transform .1s}
+  .btn:hover{background:var(--teal-d)} .btn:active{transform:translateY(1px)}
+  .btn.ghost{background:var(--surface);color:var(--teal);border:1px solid var(--line)}
+  .btn.ghost:hover{background:var(--tint)}
+  .btn.sm{padding:6px 11px;font-size:13px}
+  .btn.danger{background:var(--surface);color:var(--coral);border:1px solid var(--line)}
+  .btn.danger:hover{background:var(--r-bg)}
+
+  main{padding:30px 0 70px}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:26px}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-sm)}
+  .stat .num{font-size:30px;font-weight:800;line-height:1;letter-spacing:-0.02em}
+  .stat .num.ok{color:var(--teal)} .stat .num.warn{color:var(--amber)} .stat .num.crit{color:var(--coral)}
+  .stat .lbl{font-size:13.5px;color:var(--muted);margin-top:6px}
+
+  .sec-title{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--teal2);font-weight:700;margin:24px 0 12px}
+  .alerts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:8px}
+  .acard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-sm)}
+  .acard h3{font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .ai{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .ai:last-child{border-bottom:none} .ai .nm{font-weight:600}
+  .ai .meta{color:var(--muted);font-size:12.5px}
+  .ai.none{color:var(--muted);font-style:italic;border:none}
+
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .dot.r{background:var(--coral)} .dot.a{background:var(--amber)} .dot.g{background:var(--green)}
+  .pill{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .pill.crit{background:var(--r-bg);color:var(--coral)} .pill.warn{background:var(--a-bg);color:#9A6A1E}
+  .pill.ok{background:var(--g-bg);color:var(--green)}
+
+  .toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:6px 0 14px}
+  .filters{display:flex;gap:6px;flex-wrap:wrap}
+  .filters button{padding:8px 14px;border-radius:9px;border:1px solid var(--line);background:var(--surface);
+    color:var(--muted);font-size:13.5px;font-weight:700}
+  .filters button.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+  .search{padding:8px 12px;border:1px solid var(--line);border-radius:9px;font-size:14px;min-width:180px;background:var(--surface)}
+
+  .invhead{display:grid;grid-template-columns:14px 1.7fr .8fr .9fr .8fr auto auto;gap:11px;
+    padding:0 14px 8px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700}
+  .row{background:var(--surface);border:1px solid var(--line);border-radius:11px;margin-bottom:8px;overflow:hidden}
+  .rmain{display:grid;grid-template-columns:14px 1.7fr .8fr .9fr .8fr auto auto;gap:11px;align-items:center;padding:12px 14px}
+  .rmain .nm{font-weight:700;cursor:pointer}
+  .rmain .br{font-size:12.5px;color:var(--muted);font-weight:400}
+  .rmain .ch,.rmain .ex{color:var(--muted);font-size:13.5px;font-variant-numeric:tabular-nums}
+  .rmain .st{font-weight:700;font-variant-numeric:tabular-nums}
+  .booking{display:flex;align-items:center;gap:5px}
+  .booking button{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:var(--surface);
+    color:var(--teal);font-weight:800;font-size:15px;line-height:1}
+  .booking button:hover{background:var(--tint)}
+  .rowedit{display:flex;gap:6px}
+  .iconbtn{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--surface);
+    color:var(--muted);font-size:14px;display:flex;align-items:center;justify-content:center}
+  .iconbtn:hover{background:var(--tint2);color:var(--teal)}
+  .rdetail{padding:0 14px 14px 39px;border-top:1px solid var(--line);padding-top:12px;display:none;
+    grid-template-columns:repeat(4,1fr);gap:12px;font-size:13.5px}
+  .row.open .rdetail{display:grid}
+  .rdetail .k{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+  .rdetail .v{font-weight:600;margin-top:2px}
+  .empty{text-align:center;color:var(--muted);padding:40px;font-style:italic}
+
+  /* modal */
+  .overlay{position:fixed;inset:0;background:rgba(20,40,36,.32);display:none;align-items:flex-start;
+    justify-content:center;padding:40px 20px;z-index:100;overflow:auto}
+  .overlay.show{display:flex}
+  .modal{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);max-width:560px;width:100%;padding:28px}
+  .modal h2{font-size:20px;color:var(--teal-d);margin-bottom:18px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;margin-bottom:5px}
+  .field input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:15px;background:var(--bg)}
+  .field input:focus{outline:2px solid var(--sage);border-color:var(--sage)}
+  .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .modal-actions{display:flex;justify-content:space-between;gap:10px;margin-top:22px}
+
+  .savednote{font-size:12.5px;color:var(--green);margin-left:6px;opacity:0;transition:opacity .3s}
+  .savednote.show{opacity:1}
+  .footnote{text-align:center;color:var(--muted);font-size:12.5px;margin-top:30px;line-height:1.5}
+
+  @media(max-width:820px){
+    .stats,.alerts{grid-template-columns:1fr}
+    .invhead{display:none}
+    .rmain{grid-template-columns:14px 1fr auto;row-gap:6px}
+    .rmain .ch,.rmain .ex{display:none}
+    .rdetail{grid-template-columns:1fr 1fr}
+    .frow,.frow3{grid-template-columns:1fr}
+  }
+
+  /* How-To */
+  .howto{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--teal);
+    border-radius:14px;padding:22px 24px;margin-bottom:24px;box-shadow:var(--shadow-sm)}
+  .howto h2{font-size:18px;color:var(--teal-d);margin-bottom:4px}
+  .howto .intro{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .howto ol{margin:0;padding-left:20px}
+  .howto li{margin-bottom:8px;font-size:15px}
+  .howto .legend{display:flex;gap:18px;flex-wrap:wrap;margin:14px 0 2px;font-size:14px}
+  .howto .legend span{display:inline-flex;align-items:center;gap:7px}
+  .howto .sub{border-top:1px solid var(--line);margin-top:16px;padding-top:14px}
+  .howto .sub h3{font-size:14px;color:var(--teal);margin-bottom:8px}
+  .howto .sub p{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .howto .bkbtns{display:flex;gap:8px;flex-wrap:wrap}
+  .howto .done{margin-top:16px}
+
+  /* Voice */
+  .btn.mic{background:var(--coral)} .btn.mic:hover{background:#9d4736}
+  .btn.mic.listening{animation:micpulse 1.2s infinite}
+  @keyframes micpulse{0%{box-shadow:0 0 0 0 rgba(181,84,63,.5)}100%{box-shadow:0 0 0 12px rgba(181,84,63,0)}}
+  .voice-msg{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--teal-d);color:#fff;
+    padding:13px 22px;border-radius:12px;box-shadow:var(--shadow);font-size:15px;max-width:92%;z-index:200;
+    opacity:0;pointer-events:none;transition:opacity .25s;text-align:center}
+  .voice-msg.show{opacity:1} .voice-msg.warn{background:var(--coral)}
+
+  /* Print */
+  #printArea{display:none}
+  @media print{
+    body > *{display:none !important}
+    #printArea{display:block !important;color:#000;font-family:Helvetica,Arial,sans-serif}
+    #printArea h1{font-size:20pt;margin-bottom:2pt}
+    #printArea .pmeta{font-size:10pt;color:#444;margin-bottom:14pt}
+    #printArea h2{font-size:13pt;margin:16pt 0 6pt}
+    #printArea table{width:100%;border-collapse:collapse;font-size:9.5pt;margin-bottom:6pt}
+    #printArea th,#printArea td{border:1px solid #999;padding:5pt 7pt;text-align:left;vertical-align:top}
+    #printArea th{background:#eee}
+    @page{margin:1.6cm}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="brand"><span class="logo">Depot<span class="d">.</span></span>
+      <span class="tag">Praxis-Bestand · funktionelle Medizin</span></div>
+    <div class="actions">
+      <button class="btn" onclick="openAdd()">+ Produkt</button>
+      <button class="btn mic" id="micBtn" onclick="startVoice()">🎤 Sprechen</button>
+      <button class="btn ghost sm" onclick="printList()">🖨 Drucken</button>
+      <button class="btn ghost sm" onclick="toggleHelp()">? Hilfe</button>
+      <span class="savednote" id="savednote">✓ gespeichert</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <div class="howto" id="howto">
+      <h2>So funktioniert's — in einer Minute erklärt</h2>
+      <p class="intro">Depot ist deine digitale Bestandsliste. Sie merkt sich, was du auf Lager hast, und sagt
+        dir, was nachbestellt werden muss oder bald abläuft. Deine Daten bleiben auf diesem Computer —
+        niemand sonst sieht sie.</p>
+      <ol>
+        <li><b>Etwas ausgegeben oder verkauft?</b> Beim Produkt auf das <b>–</b> tippen. Der Bestand zählt eins runter.</li>
+        <li><b>Neue Lieferung bekommen?</b> Auf das <b>+</b> tippen — oder auf den Stift <b>✎</b> und die neue Menge eintragen.</li>
+        <li><b>Neues Produkt?</b> Oben auf <b>+ Produkt</b>.</li>
+        <li><b>Ganz oben</b> siehst du nur die paar Dinge, um die du dich heute kümmern musst — nachbestellen und was abläuft.</li>
+        <li><b>Nachbestellen?</b> Auf <b>🖨 Drucken</b> tippen — du bekommst eine saubere Liste zum Mitnehmen oder als PDF.</li>
+        <li><b>Noch schneller mit der Stimme:</b> auf <b>🎤 Sprechen</b> tippen und sagen, z. B. „drei Magnesium raus“ oder „zwei Omega rein“.</li>
+      </ol>
+      <div class="legend">
+        <span><span class="dot g"></span> alles gut</span>
+        <span><span class="dot a"></span> wird knapp / läuft bald ab</span>
+        <span><span class="dot r"></span> leer oder abgelaufen</span>
+      </div>
+      <div class="sub">
+        <h3>Sicherung — nur für den Notfall</h3>
+        <div class="bkbtns">
+          <button class="btn ghost sm" onclick="doExport()">Sicherung speichern</button>
+          <button class="btn ghost sm" onclick="document.getElementById('importFile').click()">Wiederherstellen</button>
+          <input type="file" id="importFile" accept="application/json" style="display:none" onchange="doImport(event)">
+          <button class="btn ghost sm" onclick="resetDemo()">Beispiel-Daten laden</button>
+          <button class="btn danger sm" onclick="clearAll()">Leeren — neu anfangen</button>
+        </div>
+        <p>„Sicherung speichern“ legt eine kleine Datei an — <b>bitte nicht öffnen</b>, sie ist nur fürs
+          Wiederherstellen. Falls dem Computer mal etwas passiert, holt „Wiederherstellen“ deinen ganzen
+          Bestand zurück. Tipp: einmal im Monat speichern.</p>
+      </div>
+      <div class="done"><button class="btn sm" onclick="dismissHelp()">Verstanden — ausblenden</button></div>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="sec-title">Was heute deine Aufmerksamkeit braucht</div>
+    <div class="alerts" id="alerts"></div>
+
+    <div class="sec-title">Gesamter Bestand</div>
+    <div class="toolbar">
+      <div class="filters" id="filters">
+        <button data-f="all" class="on" onclick="setFilter('all')">Alle</button>
+        <button data-f="reorder" onclick="setFilter('reorder')">Nachbestellen</button>
+        <button data-f="expiring" onclick="setFilter('expiring')">Läuft ab</button>
+      </div>
+      <input class="search" id="search" placeholder="Suchen…" oninput="render()">
+    </div>
+    <div class="invhead">
+      <span></span><span>Produkt</span><span>Charge</span><span>Bestand</span><span>Ablauf</span>
+      <span style="text-align:center">Buchung</span><span></span>
+    </div>
+    <div id="inventory"></div>
+
+    <div class="footnote">
+      Depot speichert deinen Bestand dauerhaft <b>auf diesem Computer</b> (lokal im Browser).
+      Mit „Sicherung speichern“ legst du eine Backup-Datei an · mit „Wiederherstellen“ holst du sie zurück oder auf einen anderen Rechner.<br>
+      Demo · Beispieldaten · suara.marketing@gmail.com
+    </div>
+  </div>
+</main>
+
+<!-- Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2 id="modalTitle">Produkt hinzufügen</h2>
+    <input type="hidden" id="f_id">
+    <div class="frow">
+      <div class="field"><label>Produktname</label><input id="f_name" placeholder="z. B. Vitamin D3 5000 IE"></div>
+      <div class="field"><label>Marke</label><input id="f_brand" placeholder="z. B. Pure"></div>
+    </div>
+    <div class="frow3">
+      <div class="field"><label>Bestand</label><input id="f_stock" type="number" min="0" value="0"></div>
+      <div class="field"><label>Mindestbestand</label><input id="f_min" type="number" min="0" value="4"></div>
+      <div class="field"><label>Charge</label><input id="f_charge" placeholder="z. B. L24A"></div>
+    </div>
+    <div class="frow3">
+      <div class="field"><label>Ablauf (Monat)</label><input id="f_expiry" type="month"></div>
+      <div class="field"><label>Lieferant</label><input id="f_supplier" placeholder="z. B. Pure"></div>
+      <div class="field"><label>Einkauf / Stück (€)</label><input id="f_price" type="number" min="0" step="0.01" placeholder="0,00"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn danger" id="delBtn" onclick="delCurrent()" style="visibility:hidden">Löschen</button>
+      <div style="display:flex;gap:10px;margin-left:auto">
+        <button class="btn ghost" onclick="closeModal()">Abbrechen</button>
+        <button class="btn" onclick="saveProduct()">Speichern</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="voice-msg" id="voiceMsg"></div>
+<div id="printArea"></div>
+
+<script>
+const KEY='depot_items_v1';
+let items=[], filter='all';
+
+function mexp(m){var d=new Date();d.setDate(1);d.setMonth(d.getMonth()+m);return d.toISOString().slice(0,7);} // YYYY-MM
+function seed(){
+  return [
+    {id:1,name:'Ashwagandha KSM-66',brand:'Sunday',charge:'AS30',stock:3,min:4,expiry:mexp(-1),supplier:'Sunday Natural',price:14.20,last:'−1 · heute'},
+    {id:2,name:'Probiotikum 50 Mrd',brand:'Biogena',charge:'PB44',stock:6,min:4,expiry:mexp(1),supplier:'Biogena',price:28.90,last:'−2'},
+    {id:3,name:'Vitamin B-Komplex aktiviert',brand:'Pure',charge:'BK09',stock:0,min:4,expiry:mexp(8),supplier:'Pure Encapsulations',price:31.50,last:'−1'},
+    {id:4,name:'Eisen-Bisglycinat',brand:'Pure',charge:'FE03',stock:9,min:5,expiry:mexp(2),supplier:'Pure Encapsulations',price:17.80,last:'−1'},
+    {id:5,name:'Magnesium-Glycinat',brand:'Sunday',charge:'SG77',stock:2,min:5,expiry:mexp(7),supplier:'Sunday Natural',price:12.40,last:'−3'},
+    {id:6,name:'Vitamin D3 5000 IE',brand:'Pure',charge:'L24A',stock:4,min:6,expiry:mexp(9),supplier:'Pure Encapsulations',price:19.90,last:'−2'},
+    {id:7,name:'Omega-3 EPA/DHA',brand:'Norsan',charge:'N1182',stock:12,min:8,expiry:mexp(5),supplier:'Norsan',price:24.50,last:'−1'},
+    {id:8,name:'Selen-Methionin 200',brand:'Biogena',charge:'SE21',stock:7,min:4,expiry:mexp(11),supplier:'Biogena',price:15.60,last:'−1'},
+    {id:9,name:'CoQ10 Ubichinol',brand:'Sunday',charge:'Q105',stock:5,min:3,expiry:mexp(8),supplier:'Sunday Natural',price:33.00,last:'−1'},
+    {id:10,name:'Berberin',brand:'Pure',charge:'BB12',stock:8,min:4,expiry:mexp(6),supplier:'Pure Encapsulations',price:26.40,last:'−2'},
+    {id:11,name:'Zink-Bisglycinat',brand:'Pure',charge:'ZN08',stock:11,min:5,expiry:mexp(19),supplier:'Pure Encapsulations',price:13.20,last:'−1'}
+  ];
+}
+function load(){ try{var r=localStorage.getItem(KEY); items=r?JSON.parse(r):seed();}catch(e){items=seed();} }
+function save(){ localStorage.setItem(KEY,JSON.stringify(items)); flashSaved(); }
+function flashSaved(){var n=document.getElementById('savednote');n.classList.add('show');setTimeout(function(){n.classList.remove('show')},1200);}
+
+function monthsUntil(ym){ if(!ym)return 999; var p=ym.split('-'); var d=new Date(+p[0],+p[1]-1,1); var n=new Date(); n.setDate(1);
+  return (d.getFullYear()-n.getFullYear())*12 + (d.getMonth()-n.getMonth()); }
+function fmtExp(ym){ if(!ym)return '—'; var p=ym.split('-'); return p[1]+'/'+p[0]; }
+
+function status(it){
+  var m=monthsUntil(it.expiry);
+  var expired = it.expiry && m<0;
+  var expiring = it.expiry && m>=0 && m<=2;       // ~innerhalb 3 Monaten
+  var empty = it.stock<=0;
+  var low = it.stock<=it.min;
+  var reorder = low;
+  // Status-Label + Farbe (Priorität: leer/abgelaufen > niedrig/läuft ab > ok)
+  var pill, dot;
+  if(empty){pill=['crit','leer'];dot='r';}
+  else if(expired){pill=['crit','abgelaufen'];dot='r';}
+  else if(low){pill=['warn','niedrig'];dot='a';}
+  else if(expiring){pill=['warn','läuft ab'];dot='a';}
+  else {pill=['ok','im Bestand'];dot='g';}
+  return {expired:expired,expiring:expiring||expired,reorder:reorder,empty:empty,pill:pill,dot:dot};
+}
+
+function render(){
+  // stats
+  var total=items.length;
+  var reorder=items.filter(function(i){return status(i).reorder;}).length;
+  var expiring=items.filter(function(i){return status(i).expiring;}).length;
+  document.getElementById('stats').innerHTML=
+    stat(total,'Artikel im Bestand','ok')+stat(reorder,'nachzubestellen','warn')+stat(expiring,'laufen bald ab','crit');
+
+  // alerts
+  var ro=items.filter(function(i){return status(i).reorder;}).sort(function(a,b){return a.stock-a.min-(b.stock-b.min);});
+  var ex=items.filter(function(i){return status(i).expiring;}).sort(function(a,b){return monthsUntil(a.expiry)-monthsUntil(b.expiry);});
+  document.getElementById('alerts').innerHTML=
+    acard('<span class="dot a"></span> Nachbestellen', ro.map(function(i){var s=status(i);
+      return ai(i.name,i.brand+' · '+i.stock+' von '+i.min, s.pill[0], s.pill[1]);}).join('') || none('Alles ausreichend bevorratet.'))
+    + acard('<span class="dot r"></span> Läuft ab / abgelaufen', ex.map(function(i){var s=status(i);
+      return ai(i.name,'Charge '+i.charge, s.pill[0], (s.expired?'abgelaufen · ':'')+fmtExp(i.expiry));}).join('') || none('Nichts läuft demnächst ab.'));
+
+  // inventory
+  var q=(document.getElementById('search').value||'').toLowerCase();
+  var list=items.filter(function(i){
+    if(filter==='reorder' && !status(i).reorder) return false;
+    if(filter==='expiring' && !status(i).expiring) return false;
+    if(q && (i.name+' '+i.brand+' '+i.charge).toLowerCase().indexOf(q)<0) return false;
+    return true;
+  });
+  var html=list.map(function(i){var s=status(i);
+    return '<div class="row" id="row'+i.id+'">'
+      +'<div class="rmain">'
+      +'<span class="dot '+s.dot+'"></span>'
+      +'<span><span class="nm" onclick="toggle('+i.id+')">'+esc(i.name)+'</span> <span class="br">· '+esc(i.brand)+'</span></span>'
+      +'<span class="ch">'+esc(i.charge||'—')+'</span>'
+      +'<span class="st">'+i.stock+' / '+i.min+'</span>'
+      +'<span class="ex">'+fmtExp(i.expiry)+'</span>'
+      +'<span class="booking"><button title="Abgang" onclick="book('+i.id+',-1)">–</button>'
+      +'<span class="pill '+s.pill[0]+'">'+s.pill[1]+'</span>'
+      +'<button title="Zugang" onclick="book('+i.id+',1)">+</button></span>'
+      +'<span class="rowedit"><button class="iconbtn" title="Bearbeiten" onclick="openEdit('+i.id+')">✎</button></span>'
+      +'</div>'
+      +'<div class="rdetail">'
+      +kv('Lieferant',i.supplier||'—')+kv('Einkauf / Stück',i.price?(i.price.toFixed(2).replace('.',',')+' €'):'—')
+      +kv('Letzte Buchung',i.last||'—')+kv('Lagerwert',(i.price?(i.price*i.stock).toFixed(2).replace('.',',')+' €':'—'))
+      +'</div></div>';
+  }).join('');
+  document.getElementById('inventory').innerHTML = html || '<div class="empty">Keine Artikel in dieser Ansicht.</div>';
+}
+function stat(n,l,c){return '<div class="stat"><div class="num '+c+'">'+n+'</div><div class="lbl">'+l+'</div></div>';}
+function acard(t,b){return '<div class="acard"><h3>'+t+'</h3>'+b+'</div>';}
+function ai(n,m,p,pt){return '<div class="ai"><span><span class="nm">'+esc(n)+'</span> <span class="meta">· '+esc(m)+'</span></span><span class="pill '+p+'">'+esc(pt)+'</span></div>';}
+function none(t){return '<div class="ai none">'+t+'</div>';}
+function kv(k,v){return '<div><div class="k">'+k+'</div><div class="v">'+esc(v)+'</div></div>';}
+function esc(s){return (''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function toggle(id){document.getElementById('row'+id).classList.toggle('open');}
+function setFilter(f){filter=f;[].forEach.call(document.querySelectorAll('#filters button'),function(b){b.classList.toggle('on',b.dataset.f===f);});render();}
+function book(id,d){var i=items.find(function(x){return x.id===id;});if(!i)return;i.stock=Math.max(0,i.stock+d);
+  i.last=(d<0?'−':'+')+Math.abs(d)+' · heute';save();render();}
+
+// modal
+function openAdd(){fill({});document.getElementById('modalTitle').textContent='Produkt hinzufügen';
+  document.getElementById('delBtn').style.visibility='hidden';show();}
+function openEdit(id){var i=items.find(function(x){return x.id===id;});if(!i)return;fill(i);
+  document.getElementById('modalTitle').textContent='Produkt bearbeiten';
+  document.getElementById('delBtn').style.visibility='visible';show();}
+function fill(i){document.getElementById('f_id').value=i.id||'';document.getElementById('f_name').value=i.name||'';
+  document.getElementById('f_brand').value=i.brand||'';document.getElementById('f_stock').value=i.stock!=null?i.stock:0;
+  document.getElementById('f_min').value=i.min!=null?i.min:4;document.getElementById('f_charge').value=i.charge||'';
+  document.getElementById('f_expiry').value=i.expiry||'';document.getElementById('f_supplier').value=i.supplier||'';
+  document.getElementById('f_price').value=i.price!=null?i.price:'';}
+function show(){document.getElementById('overlay').classList.add('show');}
+function closeModal(){document.getElementById('overlay').classList.remove('show');}
+function saveProduct(){
+  var id=document.getElementById('f_id').value;
+  var obj={name:document.getElementById('f_name').value.trim(),brand:document.getElementById('f_brand').value.trim(),
+    stock:Math.max(0,+document.getElementById('f_stock').value||0),min:Math.max(0,+document.getElementById('f_min').value||0),
+    charge:document.getElementById('f_charge').value.trim(),expiry:document.getElementById('f_expiry').value,
+    supplier:document.getElementById('f_supplier').value.trim(),price:parseFloat(document.getElementById('f_price').value)||0};
+  if(!obj.name){alert('Bitte einen Produktnamen eingeben.');return;}
+  if(id){var i=items.find(function(x){return x.id===+id;});Object.assign(i,obj);}
+  else{obj.id=(items.reduce(function(m,x){return Math.max(m,x.id);},0)||0)+1;obj.last='angelegt';items.push(obj);}
+  save();render();closeModal();
+}
+function delCurrent(){var id=+document.getElementById('f_id').value;if(!id)return;
+  if(!confirm('Dieses Produkt wirklich löschen?'))return;
+  items=items.filter(function(x){return x.id!==id;});save();render();closeModal();}
+
+function doExport(){var blob=new Blob([JSON.stringify(items,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='depot-sicherung-'+new Date().toISOString().slice(0,10)+'.json';a.click();}
+function doImport(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();
+  r.onload=function(){try{var d=JSON.parse(r.result);if(Array.isArray(d)){items=d;save();render();alert('Bestand importiert.');}else alert('Datei nicht erkannt.');}
+  catch(err){alert('Datei konnte nicht gelesen werden.');}};r.readAsText(f);e.target.value='';}
+function resetDemo(){if(confirm('Beispiel-Bestand wiederherstellen? Dein aktueller Bestand wird ersetzt.')){items=seed();save();render();}}
+function clearAll(){if(confirm('Wirklich den GESAMTEN Bestand löschen und leer neu anfangen? Das kann nicht rückgängig gemacht werden.')){items=[];save();render();}}
+
+// Drucken — saubere, lesbare Liste (Nachbestellen + Gesamtbestand)
+function printList(){
+  var now=new Date().toLocaleDateString('de-DE');
+  var ro=items.filter(function(i){return status(i).reorder;}).sort(function(a,b){return (a.stock-a.min)-(b.stock-b.min);});
+  var all=items.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
+  var h='<h1>Bestandsliste</h1><div class="pmeta">Praxis-Depot · Stand: '+now+'</div>';
+  if(ro.length){
+    h+='<h2>Nachbestellen ('+ro.length+')</h2><table><thead><tr><th>Produkt</th><th>Marke</th>'
+      +'<th>Bestand / Mindest</th><th>Lieferant</th></tr></thead><tbody>'
+      +ro.map(function(i){return '<tr><td>'+esc(i.name)+'</td><td>'+esc(i.brand||'')+'</td><td>'
+        +i.stock+' / '+i.min+'</td><td>'+esc(i.supplier||'')+'</td></tr>';}).join('')+'</tbody></table>';
+  }
+  h+='<h2>Gesamter Bestand ('+all.length+')</h2><table><thead><tr><th>Produkt</th><th>Marke</th>'
+    +'<th>Charge</th><th>Bestand / Mindest</th><th>Ablauf</th><th>Status</th><th>Lieferant</th></tr></thead><tbody>'
+    +all.map(function(i){var s=status(i);return '<tr><td>'+esc(i.name)+'</td><td>'+esc(i.brand||'')+'</td><td>'
+      +esc(i.charge||'')+'</td><td>'+i.stock+' / '+i.min+'</td><td>'+fmtExp(i.expiry)+'</td><td>'
+      +s.pill[1]+'</td><td>'+esc(i.supplier||'')+'</td></tr>';}).join('')+'</tbody></table>';
+  document.getElementById('printArea').innerHTML=h;
+  window.print();
+}
+function toggleHelp(){var h=document.getElementById('howto');h.style.display=(h.style.display==='none')?'block':'none';}
+function dismissHelp(){document.getElementById('howto').style.display='none';try{localStorage.setItem('depot_howto_seen','1');}catch(e){}}
+function initHelp(){ try{ if(localStorage.getItem('depot_howto_seen')) document.getElementById('howto').style.display='none'; }catch(e){} }
+
+// ===== Sprach-Prototyp (Browser-Spracherkennung, kein Server) =====
+var NUMW={'null':0,'ein':1,'eine':1,'einen':1,'eins':1,'zwei':2,'drei':3,'vier':4,'fünf':5,'funf':5,
+  'sechs':6,'sieben':7,'acht':8,'neun':9,'zehn':10,'elf':11,'zwölf':12,'zwolf':12};
+function vmsg(t,warn){var e=document.getElementById('voiceMsg');e.textContent=t;
+  e.className='voice-msg show'+(warn?' warn':'');clearTimeout(window._vt);
+  window._vt=setTimeout(function(){e.classList.remove('show');},4500);}
+function startVoice(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){vmsg('Spracheingabe wird von diesem Browser nicht unterstützt — bitte Chrome oder Safari nutzen.',true);return;}
+  var rec=new SR();rec.lang='de-DE';rec.interimResults=false;rec.maxAlternatives=1;
+  var btn=document.getElementById('micBtn');btn.classList.add('listening');btn.textContent='🎤 Hört zu…';
+  rec.onresult=function(e){handleVoice(e.results[0][0].transcript);};
+  rec.onerror=function(e){vmsg('Nicht erkannt — nochmal versuchen.',true);};
+  rec.onend=function(){btn.classList.remove('listening');btn.textContent='🎤 Sprechen';};
+  try{rec.start();}catch(err){btn.classList.remove('listening');btn.textContent='🎤 Sprechen';}
+}
+function handleVoice(text){
+  var low=' '+text.toLowerCase().replace(/[.,!?]/g,' ')+' ';
+  var sign=0;
+  if(/(raus|rausgegeben|ausgegeben|entnommen|entnehmen|verkauft|abgang|abgegeben|minus)/.test(low)) sign=-1;
+  else if(/(rein|reingekommen|eingegangen|geliefert|lieferung|bekommen|zugang|dazu|plus|aufgefüllt|aufgefullt|nachgefüllt)/.test(low)) sign=1;
+  var qty=1, toks=low.trim().split(/\s+/);
+  for(var i=0;i<toks.length;i++){ if(/^\d+$/.test(toks[i])){qty=parseInt(toks[i]);break;} if(NUMW[toks[i]]!=null){qty=NUMW[toks[i]];break;} }
+  var best=null,bestScore=0,ties=0;
+  items.forEach(function(it){
+    var words=it.name.toLowerCase().split(/[^a-zäöüß0-9]+/).filter(function(w){return w.length>=4;});
+    var sc=0; words.forEach(function(w){ if(low.indexOf(w)>=0) sc++; });
+    if(sc>bestScore){bestScore=sc;best=it;ties=1;} else if(sc===bestScore&&sc>0){ties++;}
+  });
+  if(!best||bestScore===0){vmsg('Produkt nicht erkannt: „'+text+'“. Sag z. B. „drei Magnesium raus“.',true);return;}
+  if(ties>1){vmsg('Nicht eindeutig: „'+text+'“. Sag den Namen genauer.',true);return;}
+  if(sign===0){vmsg('Sag „rein“ oder „raus“ dazu — z. B. „'+qty+' '+best.name.split(/[ -]/)[0]+' raus“.',true);return;}
+  var before=best.stock; best.stock=Math.max(0,best.stock+sign*qty);
+  best.last=(sign<0?'−':'+')+qty+' · heute (Sprache)'; save(); render();
+  vmsg('✓ '+best.name+': '+before+' → '+best.stock+'  ('+(sign<0?'−':'+')+qty+')');
+}
+
+document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+load();render();initHelp();
+</script>
+</body>
+</html>
